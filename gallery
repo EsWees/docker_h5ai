@@ -1,0 +1,42 @@
+FROM centos:latest
+
+MAINTAINER Yuriy Golik <eswees@pyhead.net>
+
+LABEL Description="Linux + Apache + PHP. CentOS 7 based." \
+      License="As is" \
+      Usage="docker run -d -p [HOST PORT NUMBER]:80 eswees/h5ai" \
+      Version="1.0"
+
+EXPOSE  80
+
+RUN yum install -y epel-release && yum update -y \
+	&& yum install -y https://centos7.iuscommunity.org/ius-release.rpm \
+	&& rpm --import /etc/pki/rpm-gpg/IUS-COMMUNITY-GPG-KEY \
+	&& yum install -y \
+		httpd \
+		mod_php70u \
+		php70u \
+		php70u-cli \
+		php70u-opcache \
+		php70u-mbstring \
+		php70u-json \
+		php70u-dom \
+		php70u-gd \
+		cyrus-sasl \
+		cyrus-sasl-plain \
+		ImageMagick \
+		ffmpeg \
+		unzip \
+		wget \
+   && yum clean all
+
+WORKDIR /var/www/html
+
+COPY httpd.conf /etc/httpd/conf/httpd.conf
+
+RUN curl -o h5ai.zip https://release.larsjung.de/h5ai/h5ai-0.29.0.zip && unzip h5ai.zip && rm -f h5ai.zip
+
+RUN chown -R apache:apache _h5ai
+
+CMD [ "/usr/sbin/apachectl", "-DFOREGROUND" ]
+
